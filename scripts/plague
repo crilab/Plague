@@ -1,0 +1,130 @@
+#!/usr/bin/env python
+
+import os
+
+import plague
+import plague_html_report
+import plague_cli_arguments
+
+matches = {}
+
+checked_files = []
+ignored_files = []
+reports_generated = 0
+
+def ignore_file (path, message):
+    global ignored_files
+    if not path in ignored_files:
+        ignored_files.append(path)
+        print(path, '<-', message)
+
+def analyze (path_self, path_other, a):
+    global checked_files
+    global ignored_files
+    global reports_generated
+
+    if path_self == path_other:
+        return
+
+    for path in [path_self, path_other]:
+        if not path.endswith('.py'):
+            ignore_file(path, 'unsupported file extension')
+            return
+
+    try:
+        path = path_self
+        self = plague.Block(path)
+        path = path_other
+        other = plague.Block(path)
+    except plague.ParseError as e:
+        ignore_file(path, str(e))
+        return False
+
+    checks = self.compare(other)
+
+    for path in [path_self, path_other]:
+        if not path in checked_files:
+            checked_files.append(path)
+
+    for threshold in a['thresholds']:
+        check_matches = len(checks['matches'][threshold])
+        check_total = checks['counters'][threshold]
+
+        if check_total and a['thresholds'][threshold] <= check_matches / check_total:
+            if not path_self in matches:
+                matches[path_self] = 0
+
+            self_path = path_self[len(a["paths"]["submissions"]):]
+            other_path = path_other[len(a["paths"]["submissions"]):]
+
+            match_count = matches[path_self]
+
+            plague_html_report.generate(
+                checks,
+                a['thresholds'],
+                a['paths']['reports'],
+                self_path,
+                other_path,
+                match_count
+            )
+
+            reports_generated += 1
+            matches[path_self] += 1
+
+            break
+
+def walk (path):
+    paths = []
+
+    if not path:
+        return paths
+
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            paths.append(os.path.join(root, f))
+
+    return paths
+
+def main():
+    global checked_files
+    global ignored_files
+    global reports_generated
+
+    a = plague_cli_arguments.get()
+
+    width = 30
+
+    print(width * '*')
+    print('PLAGIARISM CHECKER'.center(width))
+    print(width * '-')
+
+    submissions = walk(a['paths']['submissions'])
+    all_files = submissions + walk(a['paths']['archive'])
+
+    if not submissions:
+        print(a['paths']['submissions'], '<-', 'no files found')
+        print(width * '-')
+        exit()
+
+    for fs in submissions:
+        for fo in all_files:
+            analyze(fs, fo, a)
+
+    c_files = len(checked_files)
+    i_files = len(ignored_files)
+    t_files = len(all_files) # total
+
+    c_percentage = round(100 * c_files / t_files, 2)
+    i_percentage = round(100 * i_files / t_files, 2)
+
+    print(width * '-')
+    print('| SUBMISSION FILES: ', len(submissions))
+    print('| REPORTS GENERATED:', reports_generated)
+    print(width * '-')
+    print('| TOTAL FILES:', t_files)
+    print('| - CHECKED:  ', c_files, '(' + str(c_percentage) + '%)')
+    print('| - IGNORED:  ', i_files, '(' + str(i_percentage) + '%)')
+    print(width * '-')
+
+if __name__ == '__main__':
+    main()

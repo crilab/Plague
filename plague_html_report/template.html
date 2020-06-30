@@ -1,0 +1,133 @@
+<html>
+	<head>
+		<style>
+			html, body {
+				margin: 0;
+				padding: 0;
+				height: 100%%;
+			}
+			body {
+				display: grid;
+				grid-template-columns: 20%% 40%% 40%%;
+				grid-template-rows: 100%%;
+				color: black;
+				background-color: #DDEEFF;
+				font-family: monospace;
+				cursor: crosshair;
+				font-size: 15px;
+			}
+			#self-source, #other-source {
+				flex-grow: 1;
+				margin-right: 25px;
+				background-color: white;
+				overflow: scroll;
+			}
+			#self-source div, #other-source div {
+				color: white;
+				background-color: black;
+				padding: 5px 0px;
+				text-align: center;
+				font-size: 12px;
+			}
+			#self-source pre, #other-source pre {
+				padding: 25px;
+				margin: 0px;
+			}
+			#sidebar {
+				flex-grow: 1;
+				border-right: 1px solid black;
+				padding-top: 15px;
+				margin-right: 25px;
+				background-color: white;
+				overflow: scroll;
+			}
+			#self-source, #other-source {
+				margin-top: 25px;
+				margin-bottom: 25px;
+				border: 1px solid black;
+			}
+			pre > span.match.block {
+				background-color: #FFEEEE;
+			}
+			pre > span.match.comment {
+				background-color: #EEEEFF;
+			}
+			.active {
+				background-color: #FFFFAA !important;
+			}
+
+			.header {
+				background-color: #EEEEEE;
+				padding: 5px;
+				text-align: center;
+				border-top: 1px solid black;
+				border-bottom: 1px solid black;
+			}
+			.toolbar-data div {
+				padding: 15px;
+				text-align: center;
+			}
+			.threshold_ok {
+				background-color: #EEFFEE;
+				border-top: 1px solid #CCFFCC;
+				border-bottom: 1px solid #CCFFCC;
+			}
+			.threshold_alert {
+				background-color: #FFEEEE;
+				border-top: 1px solid #FFCCCC;
+				border-bottom: 1px solid #FFCCCC;
+			}
+			.threshold_unknown {
+				background-color: #FFFFFF;
+				border-top: 1px solid #CCCCCC;
+				border-bottom: 1px solid #CCCCCC;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="sidebar">
+			<div class="header">REPORT</div>
+			<div class="toolbar-data">%s</div>
+			<div class="header">MATCHING VARIABLES</div>
+			<div class="toolbar-data">%s</div>
+		</div>
+		<div id="self-source">
+			<div>%s</div>
+			<pre>%s</pre>
+		</div>
+		<div id="other-source">
+			<div>%s</div>
+			<pre>%s</pre>
+		</div>
+		<script>
+			function activate ()
+			{
+				let matches = document.querySelectorAll('[data-mid="' + this.dataset.mid + '"]')
+				for (var element of matches) {
+					element.classNameOriginal = element.className
+					element.className = 'active'
+				}
+			}
+
+			function inactivate ()
+			{
+				let matches = document.querySelectorAll('[data-mid="' + this.dataset.mid + '"]')
+				for (var element of matches) {
+					element.className = element.classNameOriginal
+				}
+			}
+
+			for (var element of document.getElementsByClassName('match'))
+			{
+				element.onmouseover = activate
+				element.onmouseout = inactivate
+			}
+
+			for (var element of document.getElementsByClassName('variable'))
+			{
+				element.onmouseover = activate
+				element.onmouseout = inactivate
+			}
+		</script>
+	</body>
+</html>
