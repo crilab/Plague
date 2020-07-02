@@ -112,18 +112,18 @@ class Line:
 
         matches = []
 
-        has_var = False
+        strict_format = False # set to true if line has nonmatching variable names
         start_index = 0
         while start_index < tokens:
             if result := self[start_index].compare(other[start_index]):
-                if result['properties']['is_var']:
-                    has_var = True
+                if result['properties']['is_var'] and not result['properties']['matching_names']:
+                    strict_format = True
                 matches.append(result)
             else:
                 break
             start_index += 1
 
-        if start_index < 2 or start_index != tokens and has_var:
+        if start_index < 2 or strict_format and start_index != tokens:
             matches = []
         else:
             end_index = tokens - 1
