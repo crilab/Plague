@@ -16,7 +16,17 @@ def ignore_file (path, message):
     global ignored_files
     if not path in ignored_files:
         ignored_files.append(path)
-        print(path, '<-', message)
+        print(' <- ' + message, end='')
+
+block_cache = {}
+
+def get_block(path):
+    global block_cache
+
+    if not path in block_cache:
+        block_cache[path] = plague.Block(path)
+
+    return block_cache[path]
 
 def analyze (path_self, path_other, a):
     global checked_files
@@ -33,9 +43,9 @@ def analyze (path_self, path_other, a):
 
     try:
         path = path_self
-        self = plague.Block(path)
+        self = get_block(path)
         path = path_other
-        other = plague.Block(path)
+        other = get_block(path)
     except plague.ParseError as e:
         ignore_file(path, str(e))
         return False
@@ -99,16 +109,34 @@ def main():
     print(width * '-')
 
     submissions = walk(a['paths']['submissions'])
-    all_files = submissions + walk(a['paths']['archive'])
+    archive = walk(a['paths']['archive'])
+    all_files = submissions + archive
 
     if not submissions:
         print(a['paths']['submissions'], '<-', 'no files found')
         print(width * '-')
         exit()
 
-    for fs in submissions:
-        for fo in all_files:
-            analyze(fs, fo, a)
+    for s in range(len(submissions)):
+        fs = submissions[s]
+        if fs in ignored_files:
+            continue
+        print('checking', fs)
+
+        collections = [
+            submissions[s+1:],
+            archive
+        ]
+
+        for collection in collections:
+            for fo in collection:
+                if fo in ignored_files:
+                    continue
+                print(' -> ' + fo, end='')
+                analyze(fs, fo, a)
+                print()
+
+        print()
 
     c_files = len(checked_files)
     i_files = len(ignored_files)
