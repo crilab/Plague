@@ -341,15 +341,15 @@ class Block:
                     'other': other.source
                 },
                 'counters': {
-                    'comments': min(
+                    'comments': max(
                         len(self.comments),
                         len(other.comments)
                     ),
-                    'tokens': min(
+                    'tokens': max(
                         self.tokens,
                         other.tokens
                     ),
-                    'variables': min(
+                    'variables': max(
                         len(self.variables),
                         len(other.variables)
                     )

@@ -79,8 +79,8 @@ def get():
         '-v',
         metavar = 'THRESHOLD',
         type = type_threshold,
-        default = 0.5,
-        help = 'minimum percentage (0 - 100) of matching variable names (default: 50)'
+        default = 0.9,
+        help = 'minimum percentage (0 - 100) of matching variable names (default: 90)'
     )
 
     args = parser.parse_args()
