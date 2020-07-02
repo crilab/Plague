@@ -152,7 +152,7 @@ class Block:
                 try:
                     self.source = f.read()
                 except UnicodeDecodeError as e:
-                    raise ParseError('Unable to decode source. Is the file binary?') from None
+                    raise ParseError('unable to decode source') from None
                 f.seek(0)
                 try:
                     for token in tokenize.generate_tokens(f.readline):
@@ -194,7 +194,7 @@ class Block:
 
         if self.indent: # Forward the token to block if indent
             if not self.lines:
-                raise ParseError('Double indentation detected on row ' + str(token.start[0]) + '.')
+                raise ParseError('double indentation detected on row ' + str(token.start[0]))
             if self.lines[-1].block.add_token(token): # Cancel execution if block accepts the token
                 return True
 
