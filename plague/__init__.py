@@ -220,7 +220,7 @@ class Block:
         blocks = []
         for line in self.lines:
             if line.is_type(block_type):
-                blocks.append(line.block)
+                blocks.append(line)
         return blocks
 
     def compare_comments (self, other):
@@ -244,6 +244,10 @@ class Block:
             self_sublock = self_sublocks[si]
             for oi in range(len(other_sublocks)):
                 other_sublock = other_sublocks[oi]
+
+                line_matches = self_sublock.compare(other_sublock)
+                block_matches = self_sublock.block.compare(other_sublock.block)
+
                 candidate_matches.append({
                     'self': {
                         'sublock': self_sublock,
@@ -253,7 +257,7 @@ class Block:
                         'sublock': other_sublock,
                         'index': oi
                     },
-                    'matches': self_sublock.compare(other_sublock)
+                    'matches': line_matches + block_matches
                 })
 
         candidate_matches.sort(key=lambda x: (-len(x['matches']), x['self']['index'], x['other']['index']))
@@ -293,15 +297,19 @@ class Block:
 
         for si in range(len(self)):
             line_self = self[si]
+            if line_self.is_type('class', 'def'):
+                continue
             for oi in range(len(other)):
                 line_other = other[oi]
+                if line_other.is_type('class', 'def'):
+                    continue
 
                 match_pair = {
                     'self_line': si,
                     'matches': line_self.compare(line_other)
                 }
 
-                if line_self.block and line_other.block and not (line_self.is_type('class', 'def') or line_other.is_type('class', 'def')):
+                if line_self.block and line_other.block:
                     match_pair['matches'] += line_self.block.compare(line_other.block)
 
                 if len(match_pair['matches']):
