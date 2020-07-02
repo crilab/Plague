@@ -235,27 +235,36 @@ class Block:
 
     def compare_sublocks (self, other, block_type):
         matches = []
+        candidate_matches = []
 
-        match_count = dict((sublock,0) for sublock in other.list_sublocks(block_type))
+        self_sublocks = self.list_sublocks(block_type)
+        other_sublocks = other.list_sublocks(block_type)
 
-        for self_sublock in self.list_sublocks(block_type):
-            best_matches = []
-            best_sublock = None
+        for si in range(len(self_sublocks)):
+            self_sublock = self_sublocks[si]
+            for oi in range(len(other_sublocks)):
+                other_sublock = other_sublocks[oi]
+                candidate_matches.append({
+                    'self': {
+                        'sublock': self_sublock,
+                        'index': si
+                    },
+                    'other': {
+                        'sublock': other_sublock,
+                        'index': oi
+                    },
+                    'matches': self_sublock.compare(other_sublock)
+                })
 
-            for other_sublock in other.list_sublocks(block_type):
-                candidate_matches = self_sublock.compare(other_sublock)
+        candidate_matches.sort(key=lambda x: (-len(x['matches']), x['self']['index'], x['other']['index']))
 
-                bm = len(best_matches)
-                cm = len(candidate_matches)
+        occupied_sublocks = []
 
-                if not best_sublock or bm < cm or bm == cm and match_count[other_sublock] < match_count[best_sublock]:
-                    best_sublock = other_sublock
-                    best_matches = candidate_matches
-
-            if best_sublock:
-                match_count[best_sublock] += 1
-
-            matches += best_matches
+        for cm in candidate_matches:
+            if not (cm['self']['sublock'] in occupied_sublocks or cm['other']['sublock'] in occupied_sublocks):
+                matches += cm['matches']
+                occupied_sublocks.append(cm['self']['sublock'])
+                occupied_sublocks.append(cm['other']['sublock'])
 
         return matches
 
