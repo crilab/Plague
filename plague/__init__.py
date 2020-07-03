@@ -123,7 +123,7 @@ class Line:
                 break
             start_index += 1
 
-        if start_index < 2 or strict_format and start_index != tokens:
+        if start_index < 1 or strict_format and start_index != tokens:
             matches = []
         else:
             end_index = tokens - 1
