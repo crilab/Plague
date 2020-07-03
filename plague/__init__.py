@@ -315,34 +315,34 @@ class Block:
                 if len(match_pair['matches']):
                     match_pairs[oi].append(match_pair)
 
+        search_cache = [[None for o in range(len(other))] for s in range(len(self))]
+
         def search(self_line, other_line):
-            best_matches = []
+            if len(other) <= other_line or len(self) <= self_line:
+                return []
 
-            def analyze(candidate_matches):
-                nonlocal best_matches
-                if len(best_matches) < len(candidate_matches):
-                    best_matches = candidate_matches
+            if search_cache[self_line][other_line] is None:
+                def analyze(candidate_matches):
+                    sc = search_cache[self_line][other_line]
+                    if sc is None or len(sc) < len(candidate_matches):
+                        search_cache[self_line][other_line] = candidate_matches
 
-            if other_line == len(match_pairs):
-                return best_matches
+                for match in match_pairs[other_line]:
+                    if self_line <= match['self_line']:
+                        candidate_matches = search(
+                            match['self_line'] + 1,
+                            other_line + 1
+                        )
+                        analyze(candidate_matches + match['matches'])
 
-            for match in match_pairs[other_line]:
-                if self_line <= match['self_line']:
-                    candidate_matches = search(
-                        match['self_line'] + 1,
+                analyze(
+                    search(
+                        self_line,
                         other_line + 1
                     )
-                    candidate_matches += match['matches']
-                    analyze(candidate_matches)
-
-            analyze(
-                search(
-                    self_line,
-                    other_line + 1
                 )
-            )
 
-            return best_matches
+            return search_cache[self_line][other_line]
 
         token_matches = search(0, 0)
 
