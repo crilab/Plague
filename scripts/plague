@@ -38,11 +38,6 @@ def analyze (path_self, path_other, a):
     if path_self == path_other:
         return
 
-    for path in [path_self, path_other]:
-        if not path.endswith('.py'):
-            ignore_file(path, 'unsupported file extension')
-            return
-
     try:
         path = path_self
         self = get_block(path)

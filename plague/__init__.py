@@ -148,6 +148,8 @@ class Block:
         self.indent = False
 
         if path:
+            if not path.endswith('.py'):
+                raise ParseError('unsupported file extension')
             with open(path) as f:
                 try:
                     self.source = f.read()
