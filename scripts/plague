@@ -123,7 +123,16 @@ def main():
         fs = submissions[s]
         if fs in ignored_files:
             continue
-        print('checking', fs)
+        print('checking ' + fs, end='')
+
+        try:
+            get_block(fs)
+        except plague.ParseError as e:
+            ignore_file(fs, str(e))
+            print('\n')
+            continue
+
+        print()
 
         collections = [
             submissions[s+1:],
