@@ -30,7 +30,7 @@ def get_block(path):
 
     return block_cache[path]
 
-def analyze (block_self, block_other, a):
+def analyze (path_self, block_self, path_other, block_other, a):
     global reports_generated
 
     checks = block_self.compare(block_other)
@@ -130,7 +130,7 @@ def main():
                     print()
                     continue
 
-                analyze(block_self, block_other, a)
+                analyze(fs, block_self, fo, block_other, a)
 
                 for path in [fs, fo]:
                     if not path in checked_files:
