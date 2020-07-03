@@ -30,28 +30,10 @@ def get_block(path):
 
     return block_cache[path]
 
-def analyze (path_self, path_other, a):
-    global checked_files
-    global ignored_files
+def analyze (block_self, block_other, a):
     global reports_generated
 
-    if path_self == path_other:
-        return
-
-    try:
-        path = path_self
-        self = get_block(path)
-        path = path_other
-        other = get_block(path)
-    except plague.ParseError as e:
-        ignore_file(path, str(e))
-        return False
-
-    checks = self.compare(other)
-
-    for path in [path_self, path_other]:
-        if not path in checked_files:
-            checked_files.append(path)
+    checks = block_self.compare(block_other)
 
     for threshold in a['thresholds']:
         check_matches = len(checks['matches'][threshold])
@@ -121,7 +103,7 @@ def main():
         print('checking ' + fs, end='')
 
         try:
-            get_block(fs)
+            block_self = get_block(fs)
         except plague.ParseError as e:
             ignore_file(fs, str(e))
             print('\n')
@@ -136,10 +118,24 @@ def main():
 
         for collection in collections:
             for fo in collection:
-                if fo in ignored_files:
+                if fo in ignored_files or fo == fs:
                     continue
+
                 print(' -> ' + fo, end='')
-                analyze(fs, fo, a)
+
+                try:
+                    block_other = get_block(fo)
+                except plague.ParseError as e:
+                    ignore_file(fo, str(e))
+                    print()
+                    continue
+
+                analyze(block_self, block_other, a)
+
+                for path in [fs, fo]:
+                    if not path in checked_files:
+                        checked_files.append(path)
+
                 print()
 
         print()
