@@ -18,11 +18,13 @@
 			}
 			#self-source, #other-source {
 				flex-grow: 1;
+				display: flex;
+				flex-direction: column;
 				margin-right: 25px;
 				background-color: white;
-				overflow: scroll;
 			}
 			#self-source div, #other-source div {
+				flex-grow: 0;
 				color: white;
 				background-color: black;
 				padding: 5px 0px;
@@ -30,8 +32,10 @@
 				font-size: 12px;
 			}
 			#self-source pre, #other-source pre {
-				padding: 25px;
+				flex-grow: 1;
+				padding: 10px;
 				margin: 0px;
+				overflow: scroll;
 			}
 			#sidebar {
 				flex-grow: 1;
